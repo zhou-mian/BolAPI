@@ -435,8 +435,55 @@ class BolRetailerAPI(BolAPI):
 
         return dict_data
     
-
 class BolAdvertisingAPI(BolAPI):
+    """ Initializes API connection with bol Advertising API v11 ALPHA
+
+    Methods
+    -------
+    request_campaigns_report(start_date, end_date)
+        Obtain performance results of all campaign for requested period
+    """
+
+    def __init__(self, client_id: str, client_secret: str):
+        super().__init__(client_id, client_secret)
+        self.headers = {
+            'Accept' : 'application/vnd.advertiser.v10+json',
+            'Content-Type' : 'application/vnd.advertiser.v10+json'
+        }
+        self.get_access_token()
+    
+
+    def request_bulk_report(self, entity_type: str, start_date: str, end_date: str):
+        endpoint_url = f'advertiser/sponsored-products/reporting/bulk-reports?entity-type={entity_type}&start-date={start_date}&end-date={end_date}'
+        status, response = self.post(endpoint_url)
+
+        if status == 202:
+            # Check status of offer export
+            process_id = response.json()['processStatusId']
+            endpoint_url = f'shared/process-status/{process_id}'
+            _, process = self.get(endpoint_url)
+            
+            while process.json()['status'] == 'PENDING':
+                time.sleep(60) # Wait 60 seconds
+                _, process = self.get(endpoint_url)
+            
+            if process.json()['status'] == 'SUCCESS':
+                report_id = process.json()['entityId']
+                endpoint_url = f'advertiser/sponsored-products/reporting/bulk-reports/{report_id}'
+                status, response = self.get(endpoint_url)
+                if status == 200:
+                    download_url = response.json()['url']
+                    report = requests.get(download_url)
+
+                    return pd.read_csv(StringIO(report.content.decode('utf-8')))
+                
+                else: print(f'ERROR: failed to retrieve campaign performance \n{response.text}')
+
+        else:
+            print(f'ERROR: failed to request campaign performance export \n{response.text}')
+
+
+class BolAdvertisingAPIv10(BolAPI):
     """ Initializes API connection with bol Advertising API v10
 
     Methods
