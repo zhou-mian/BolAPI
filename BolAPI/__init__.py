@@ -1,1 +1,1 @@
-from .BolAPI import BolAPI, BolAdvertisingAPI, BolRetailerAPI, BolAdvertisingAPIv9
+from .BolAPI import BolAPI, BolAdvertisingAPI, BolRetailerAPI, BolAdvertisingAPIv9, BolAdvertisingAPIv10
