@@ -447,8 +447,8 @@ class BolAdvertisingAPI(BolAPI):
     def __init__(self, client_id: str, client_secret: str):
         super().__init__(client_id, client_secret)
         self.headers = {
-            'Accept' : 'application/vnd.advertiser.v10+json',
-            'Content-Type' : 'application/vnd.advertiser.v10+json'
+            'Accept' : 'application/vnd.advertiser.v11+json',
+            'Content-Type' : 'application/vnd.advertiser.v11+json'
         }
         self.get_access_token()
     
